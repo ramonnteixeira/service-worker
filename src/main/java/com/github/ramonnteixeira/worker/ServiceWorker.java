@@ -2,6 +2,8 @@ package com.github.ramonnteixeira.worker;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -11,47 +13,69 @@ import org.slf4j.LoggerFactory;
 public class ServiceWorker {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServiceWorker.class);
-    private static final ServiceWorker INSTANCE = new ServiceWorker();
+    private static final Map<String, ServiceWorker> INSTANCES = new HashMap<>();
+    private static final String SERVICE_DEFAULT = "service_worker_default";
 
     private ScheduledExecutorService executor;
+    private final String poolName;
 
-    private ServiceWorker() {
-        //NOP
+    private ServiceWorker(final String poolName) {
+        this.poolName = poolName;
     }
 
     /**
-     * Start ServiceWorker with default values (2 corePoolSize, "service_worker" as pollName);
+     * Get a default service worker
+     *
+     * @return instance of ServiceWorker
      */
-    public static void start() {
-        start(2, "service_worker");
+    public static final ServiceWorker get() {
+        return get(SERVICE_DEFAULT);
     }
 
     /**
-     * Start serviceWorker
+     * Get a specific service worker
+     *
+     * @param poolName
+     * @return instance of ServiceWorker with specific poolName
+     */
+    public static final ServiceWorker get(final String poolName) {
+        final ServiceWorker instance = INSTANCES.getOrDefault(poolName, new ServiceWorker(poolName));
+        INSTANCES.put(poolName, instance);
+        return instance;
+    }
+
+    /**
+     * Start an instance of serviceWorker
      *
      * @param corePoolSize number of threads in pool
      * @param poolName Name of threads
      */
-    public static void start(final int corePoolSize, final String poolName) {
-        stop();
-        INSTANCE.executor = Executors.newScheduledThreadPool(corePoolSize,
+    public final void start(final int corePoolSize) {
+        executor = Executors.newScheduledThreadPool(corePoolSize,
                 (Runnable r) -> new Thread(r, poolName));
+    }
+
+    /**
+     * Shutdown all instances
+     */
+    public static final void shutDown() {
+        INSTANCES.values().stream().forEach(ServiceWorker::stop);
     }
 
     /**
      * Stop all process
      */
-    public static final void stop() {
-        if (INSTANCE.executor != null) {
-            INSTANCE.executor.shutdown();
+    private void stop() {
+        if (executor != null) {
+            executor.shutdown();
             try {
-                INSTANCE.executor.awaitTermination(3, TimeUnit.SECONDS);
+                executor.awaitTermination(3, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 LOG.error(e.getMessage(), e);
             }
-            INSTANCE.executor.shutdownNow();
+            executor.shutdownNow();
 
-            INSTANCE.executor = null;
+            executor = null;
         }
     }
 
@@ -60,7 +84,7 @@ public class ServiceWorker {
      *
      * @param runnable
      */
-    public static void run(Runnable runnable) {
+    public final void run(final Runnable runnable) {
         run(runnable, 5l);
     }
 
@@ -70,7 +94,7 @@ public class ServiceWorker {
      * @param runnable
      * @param delay
      */
-    public static void run(Runnable runnable, long delay) {
+    public final void run(final Runnable runnable, final long delay) {
         run(runnable, delay, TimeUnit.MILLISECONDS);
     }
 
@@ -81,8 +105,8 @@ public class ServiceWorker {
      * @param delay
      * @param timeunit
      */
-    public static void run(Runnable runnable, long delay, TimeUnit timeunit) {
-        INSTANCE.executor.schedule(runnable, delay, timeunit);
+    public final void run(final Runnable runnable, final long delay, final TimeUnit timeunit) {
+        executor.schedule(runnable, delay, timeunit);
     }
 
     /**
@@ -91,7 +115,7 @@ public class ServiceWorker {
      * @param runnable
      * @param time
      */
-    public static void run(Runnable runnable, LocalDateTime time) {
+    public final void run(final Runnable runnable, final LocalDateTime time) {
         run(runnable, Duration.between(LocalDateTime.now(), time).toMillis());
     }
 
@@ -102,8 +126,8 @@ public class ServiceWorker {
      * @param delay
      * @param period
      */
-    public static void run(Runnable runnable, long delay, long period) {
-        INSTANCE.executor.scheduleWithFixedDelay(runnable, delay, period, TimeUnit.MILLISECONDS);
+    public final void run(final Runnable runnable, final long delay, final long period) {
+        executor.scheduleWithFixedDelay(runnable, delay, period, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -113,7 +137,7 @@ public class ServiceWorker {
      * @param firstTime
      * @param period
      */
-    public static void run(Runnable runnable, LocalDateTime firstTime, long period) {
+    public final void run(final Runnable runnable, final LocalDateTime firstTime, final long period) {
         run(runnable, Duration.between(LocalDateTime.now(), firstTime).toMillis(), period);
     }
 

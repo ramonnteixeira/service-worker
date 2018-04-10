@@ -17,16 +17,16 @@ On your application, start the Service worker and stop only when go close the ap
 
 ```
 public static void main(String[] args) {
-    ServiceWorker.start();
+    ServiceWorker.get().start(4);
 
     // Queue MyService.exec() now and every 5 seconds after the last execution
-    ServiceWorker.run(MyService::exec, LocalDateTime.now(), 5000);
+    ServiceWorker.get().run(MyService::exec, LocalDateTime.now(), 5000);
 
     // Queue MyService.exec() now
-    ServiceWorker.run(MyService::exec);
+    ServiceWorker.get().run(MyService::exec);
 
     // Queue MyService.finish() to run after 30 seconds
-    ServiceWorker.run(MyService::shutdown, 30, TimeUnit.SECONDS);
+    ServiceWorker.get().run(MyService::shutdown, 30, TimeUnit.SECONDS);
 }
 
 public static void exec() {
@@ -34,7 +34,7 @@ public static void exec() {
 }
 
 public static void shutdown() {
-    ServiceWorker.stop();    
+    ServiceWorker.shutDown();|
 }
 ```
 

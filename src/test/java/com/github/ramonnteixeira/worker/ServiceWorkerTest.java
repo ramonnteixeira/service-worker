@@ -8,32 +8,20 @@ import org.junit.Test;
 
 public class ServiceWorkerTest {
 
-    public static void main(String[] args) {
-        ServiceWorker.start();
-
-        ServiceWorker.run(ServiceWorkerTest::exec, LocalDateTime.now(), 5000);
-
-        ServiceWorker.stop();
-    }
-
-    public static void exec() {
-        // nothing
-    }
-
     @BeforeClass
     public static void up() {
-        ServiceWorker.start();
+        ServiceWorker.get().start(4);
     }
 
     @AfterClass
     public static void down() {
-        ServiceWorker.stop();
+        ServiceWorker.shutDown();
     }
 
     @Test
     public void scheduleWithFixedDelay() throws InterruptedException {
         FunctionMock mock = new FunctionMock();
-        ServiceWorker.run(mock::executeWithDelay, LocalDateTime.now(), 500);
+        ServiceWorker.get().run(mock::executeWithDelay, LocalDateTime.now(), 500);
         Thread.sleep(1350L);
         Assert.assertTrue("Expected count = 2, but count = " + mock.getCount(), mock.getCount() == 2);
     }
@@ -41,8 +29,8 @@ public class ServiceWorkerTest {
     @Test
     public void runNow() throws InterruptedException {
         FunctionMock mock = new FunctionMock();
-        ServiceWorker.run(mock::count);
-        ServiceWorker.run(mock::count, LocalDateTime.now());
+        ServiceWorker.get().run(mock::count);
+        ServiceWorker.get().run(mock::count, LocalDateTime.now());
         Thread.sleep(50L);
         Assert.assertTrue("Expected count = 2, but count = " + mock.getCount(), mock.getCount() == 2);
     }
