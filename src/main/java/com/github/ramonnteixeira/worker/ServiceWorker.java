@@ -39,9 +39,26 @@ public class ServiceWorker {
      * @return instance of ServiceWorker with specific poolName
      */
     public static final ServiceWorker get(final String poolName) {
+        if (INSTANCES.containsKey(poolName)) {
+            return INSTANCES.get(poolName);
+        }
+        
+        return INSTANCES.values().stream().findAny().get();
+    }
+    
+    private static ServiceWorker getOrCreate(final String poolName) {
         final ServiceWorker instance = INSTANCES.getOrDefault(poolName, new ServiceWorker(poolName));
         INSTANCES.put(poolName, instance);
         return instance;
+    }
+
+    /**
+     * Start an instance of serviceWorker with poolName default
+     *
+     * @param corePoolSize number of threads in pool
+     */
+    public static final void start(final int corePoolSize) {
+        start(SERVICE_DEFAULT, corePoolSize);
     }
 
     /**
@@ -50,8 +67,9 @@ public class ServiceWorker {
      * @param corePoolSize number of threads in pool
      * @param poolName Name of threads
      */
-    public final void start(final int corePoolSize) {
-        executor = Executors.newScheduledThreadPool(corePoolSize,
+    public static final void start(final String poolName, final int corePoolSize) {
+        final ServiceWorker instance = getOrCreate(poolName);
+        instance.executor = Executors.newScheduledThreadPool(corePoolSize,
                 (Runnable r) -> new Thread(r, poolName));
     }
 
@@ -74,7 +92,6 @@ public class ServiceWorker {
                 LOG.error(e.getMessage(), e);
             }
             executor.shutdownNow();
-
             executor = null;
         }
     }

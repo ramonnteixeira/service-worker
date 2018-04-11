@@ -8,22 +8,22 @@ To use add maven dependency
 <dependency>
     <groupId>com.github.ramonnteixeira</groupId>
     <artifactId>service-worker</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
-On your application, start the Service worker and stop only when go close the app.
+On your application, start the Service worker and stop only when closing the app.
 
 
 ```
 public static void main(String[] args) {
-    ServiceWorker.get().start(4);
+    ServiceWorker.start(4);
 
     // Queue MyService.exec() now and every 5 seconds after the last execution
     ServiceWorker.get().run(MyService::exec, LocalDateTime.now(), 5000);
 
-    // Queue MyService.exec() now
-    ServiceWorker.get().run(MyService::exec);
+    // Search for "other_pool" and queue MyService.exec() now 
+    ServiceWorker.get("other_pool").run(MyService::exec);
 
     // Queue MyService.finish() to run after 30 seconds
     ServiceWorker.get().run(MyService::shutdown, 30, TimeUnit.SECONDS);
@@ -34,7 +34,7 @@ public static void exec() {
 }
 
 public static void shutdown() {
-    ServiceWorker.shutDown();|
+    ServiceWorker.shutDown();
 }
 ```
 

@@ -10,7 +10,7 @@ public class ServiceWorkerTest {
 
     @BeforeClass
     public static void up() {
-        ServiceWorker.get().start(4);
+        ServiceWorker.start(4);
     }
 
     @AfterClass
@@ -30,7 +30,7 @@ public class ServiceWorkerTest {
     public void runNow() throws InterruptedException {
         FunctionMock mock = new FunctionMock();
         ServiceWorker.get().run(mock::count);
-        ServiceWorker.get().run(mock::count, LocalDateTime.now());
+        ServiceWorker.get("invalid_pool").run(mock::count, LocalDateTime.now());
         Thread.sleep(50L);
         Assert.assertTrue("Expected count = 2, but count = " + mock.getCount(), mock.getCount() == 2);
     }

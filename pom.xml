@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.ramonnteixeira</groupId>
     <artifactId>service-worker</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     
     <properties>
@@ -120,18 +120,6 @@
                         </goals> 
                     </execution>
                 </executions>
-            </plugin>
-            <plugin> 
-                <artifactId>maven-javadoc-plugin</artifactId> 
-                <executions> 
-                    <execution> 
-                        <id>attach-javadocs</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals> 
-                    </execution> 
-                </executions> 
             </plugin>
             <plugin> 
                 <artifactId>maven-deploy-plugin</artifactId> 
