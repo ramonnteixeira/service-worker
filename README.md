@@ -1,5 +1,7 @@
 # Service Worker
 
+[![CircleCI](https://circleci.com/gh/ramonnteixeira/service-worker.svg?style=svg)](https://circleci.com/gh/ramonnteixeira/service-worker)
+
 This lib borned to manipulate a thread pool with concurrently queue tasks.
 
 To use add maven dependency
